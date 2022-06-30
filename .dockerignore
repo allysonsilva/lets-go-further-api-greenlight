@@ -1,0 +1,15 @@
+# **.git
+**.gitignore
+**.gitattributes
+**.vscode
+**.history
+**.DS_Store
+
+docker*
+!docker/golang/docker-entrypoint.sh
+
+**/vendor
+
+**/README.md
+**/LICENSE
+**/CHANGELOG.md

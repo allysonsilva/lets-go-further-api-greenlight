@@ -1,0 +1,17 @@
+version: '3.8'
+
+networks:
+    compose_network:
+        driver: bridge
+        name: ${DEFAULT_DOCKER_NETWORK}
+        ipam:
+            driver: default
+
+services:
+
+    hello-world:
+        image: hello-world:latest
+        hostname: hello-world
+        container_name: hello-world
+        networks:
+            compose_network:

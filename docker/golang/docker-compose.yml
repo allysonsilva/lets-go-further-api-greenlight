@@ -1,0 +1,48 @@
+---
+version: '3.8'
+
+networks:
+    external_network:
+        external: true
+        name: ${DEFAULT_DOCKER_NETWORK}
+
+services:
+
+    app:
+        # user: ${CURRENT_UID:?"Please run as follows 'CURRENT_UID=$(id -u):$(id -g) docker-compose up'"}
+        image: ${APP_IMAGE:-greenlight-app}
+        # hostname: ${CONTAINER_NAME_PREFIX}_app
+        container_name: ${CONTAINER_NAME_PREFIX}_app
+        build:
+            context: ${ROOT_PATH}
+            dockerfile: ${DOCKER_GOLANG_PATH}/Dockerfile
+            args:
+                APP_ENV: production
+                USER_UID: ${USER_UID}
+                USER_GID: ${USER_GID}
+                LOCAL_DOCKER_FOLDER: ${LOCAL_DOCKER_FOLDER}
+        command: -env=production
+        ports:
+            - 4000
+            - 8000
+        volumes:
+            - ${DOCKER_GOLANG_PATH}/docker-entrypoint.sh:/entrypoint.sh:ro
+            # - ${ROOT_PATH}:/var/www/app:delegated
+        env_file:
+            - ${DOCKER_GOLANG_PATH}/.env.container
+        restart: on-failure:3
+        # Graceful shutdown
+        stop_signal: SIGQUIT
+        stop_grace_period: 60s
+        networks:
+            external_network:
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "1m"
+                max-file: "5"
+                mode: "non-blocking"
+                tag: "logging-app"
+        cap_drop:
+            - NET_ADMIN
+            - SYS_ADMIN
