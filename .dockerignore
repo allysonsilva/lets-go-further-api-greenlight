@@ -7,6 +7,7 @@
 
 docker*
 !docker/golang/docker-entrypoint.sh
+!docker/golang/docker-entrypoint.local.sh
 
 **/vendor
 
