@@ -129,7 +129,7 @@ build/api:
 	@echo 'Building cmd/api...'
 	go build -v -ldflags=${linker_flags} -o=./bin/main ./cmd/api
 # go tool dist list
-	GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/linux_amd64/main ./cmd/api
+# GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/linux_amd64/main ./cmd/api
 
 # ==================================================================================== #
 # DOCKER
