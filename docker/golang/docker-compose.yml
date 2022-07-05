@@ -15,7 +15,7 @@ services:
         container_name: ${CONTAINER_NAME_PREFIX}_app
         build:
             context: ${ROOT_PATH}
-            dockerfile: ${DOCKER_GOLANG_PATH}/Dockerfile
+            dockerfile: ${DOCKER_GOLANG_PATH}/${DOCKER_GOLANG_DOCKERFILE}
             args:
                 APP_ENV: production
                 USER_UID: ${USER_UID}
@@ -26,8 +26,8 @@ services:
             - 4000
             - 8000
         volumes:
-            - ${DOCKER_GOLANG_PATH}/docker-entrypoint.sh:/entrypoint.sh:ro
-            # - ${ROOT_PATH}:/var/www/app:delegated
+            - ${DOCKER_GOLANG_PATH}/${DOCKER_GOLANG_ENTRYPOINT}:/entrypoint.sh:ro
+            - ${ROOT_PATH}:/var/www/app:delegated
         env_file:
             - ${DOCKER_GOLANG_PATH}/.env.container
         restart: on-failure:3
