@@ -127,7 +127,7 @@ linker_flags = '-s -X main.buildTime=${current_time} -X main.version=${git_descr
 .PHONY: build/api
 build/api:
 	@echo 'Building cmd/api...'
-	go build -v -ldflags=${linker_flags} -o=./bin/main ./cmd/api
+	go build -v -ldflags=${linker_flags} -buildvcs=false -o=./bin/main ./cmd/api
 # go tool dist list
 # GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/linux_amd64/main ./cmd/api
 
