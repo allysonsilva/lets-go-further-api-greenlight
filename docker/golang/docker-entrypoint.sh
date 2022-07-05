@@ -27,4 +27,4 @@ printf '=================\n'
 printf "\033[34mLaunching APP ...\033[0m\n"
 printf '=================\n\n'
 
-exec ./main -port=${APP_PORT} -db-dsn="${DB_DSN}" "$@"
+exec ./main -port=${APP_PORT} -db-dsn=${DB_DSN} -smtp-username=${MAIL_USERNAME:-""} -smtp-password=${MAIL_PASSWORD:-""} "$@"

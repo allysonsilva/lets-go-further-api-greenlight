@@ -7,4 +7,4 @@ printf '==============================\n'
 printf "\033[34m[ENTRYPOINT] Launching APP ...\033[0m\n"
 printf '==============================\n'
 
-exec air -- -port=${APP_PORT} -db-dsn=${DB_DSN} "$@"
+exec air -- -port=${APP_PORT} -db-dsn=${DB_DSN} -smtp-username=${MAIL_USERNAME:-""} -smtp-password=${MAIL_PASSWORD:-""} "$@"
