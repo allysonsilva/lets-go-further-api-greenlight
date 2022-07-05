@@ -261,7 +261,7 @@ func (m MovieModel) Update(movie *Movie) error {
 		}
 	}
 
-	row := m.DB.QueryRow("SELECT version FROM movies WHERE id = ? AND version = ?", movie.ID, movie.Version)
+	row := m.DB.QueryRow("SELECT version FROM movies WHERE id = ? AND version = ?", movie.ID, movie.Version+1)
 
 	return row.Scan(&movie.Version)
 }
