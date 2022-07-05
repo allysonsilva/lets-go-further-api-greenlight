@@ -19,7 +19,7 @@ fi
 if [[ ${FORCE_MIGRATE:-false} == true ]]; then
     printf "\n\033[33m💥 Applying all up database migrations.\033[0m\n\n"
 
-    migrate -path ./migrations -database "mysql://${DB_DSN}" up || true
+    migrate -path ./migrations -database "mysql://${DB_DSN:1:-1}" up || true
 fi
 
 printf "\n"
