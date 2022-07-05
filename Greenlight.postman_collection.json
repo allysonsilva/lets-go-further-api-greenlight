@@ -1,0 +1,385 @@
+{
+	"info": {
+		"_postman_id": "b1ac9c10-7c88-4953-ac63-433b59dba3de",
+		"name": "Greenlight",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20525223"
+	},
+	"item": [
+		{
+			"name": "Filmes",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:{{HTTP_PORT}}/v1/movies?sort=title",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{HTTP_PORT}}",
+							"path": [
+								"v1",
+								"movies"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "title"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Show",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:{{HTTP_PORT}}/v1/movies/{id}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{HTTP_PORT}}",
+							"path": [
+								"v1",
+								"movies",
+								"{id}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Título do filme\",\n    \"year\": 1999,\n    \"runtime\": \"123 mins\",\n    \"genres\": [\n        \"animation\",\n        \"adventure\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:{{HTTP_PORT}}/v1/movies",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{HTTP_PORT}}",
+							"path": [
+								"v1",
+								"movies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Destroy",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:{{HTTP_PORT}}/v1/movies/{id}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{HTTP_PORT}}",
+							"path": [
+								"v1",
+								"movies",
+								"{id}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Novo título\",\n    \"genres\": [\n        \"New A\",\n        \"New B\",\n        \"animation\",\n        \"adventure\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:{{HTTP_PORT}}/v1/movies/{id}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{HTTP_PORT}}",
+							"path": [
+								"v1",
+								"movies",
+								"{id}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Novo Usuário",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Nome usuário\",\n    \"email\": \"user@example.com\",\n    \"password\": \"pa55word\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{HTTP_PORT}}/v1/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{HTTP_PORT}}",
+					"path": [
+						"v1",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Ativar Usuário",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"token\": \"RWU3XMW22LSGKOM7UWJGVZCD4I\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{HTTP_PORT}}/v1/users/activated",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{HTTP_PORT}}",
+					"path": [
+						"v1",
+						"users",
+						"activated"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Autenticar Usuário",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"pa55word\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{HTTP_PORT}}/v1/tokens/authentication",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{HTTP_PORT}}",
+					"path": [
+						"v1",
+						"tokens",
+						"authentication"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Debug",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:{{HTTP_PORT}}/debug/vars",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{HTTP_PORT}}",
+					"path": [
+						"debug",
+						"vars"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

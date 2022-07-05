@@ -1,0 +1,863 @@
+openapi: 3.0.0
+info:
+  title: OpenAPI Greenlight
+  version: '1.0'
+  description: '**Documentação da API do projeto Greenlight, do livro https://lets-go-further.alexedwards.net/**'
+servers:
+  - url: 'http://localhost:4000'
+paths:
+  /v1/healthcheck:
+    get:
+      summary: Show application information
+      tags:
+        - Healthcheck
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    default: available
+                  system_info:
+                    type: object
+                    required:
+                      - environment
+                      - version
+                    properties:
+                      environment:
+                        type: string
+                        pattern: production|development|staging
+                        default: production
+                      version:
+                        type: string
+                required:
+                  - status
+                  - system_info
+              examples:
+                Development:
+                  value:
+                    status: available
+                    system_info:
+                      environment: development
+                      version: 50eaf81
+      operationId: get-v1-healthcheck
+      description: '**Show application health and version information**'
+  /v1/movies:
+    get:
+      summary: Recupera todos os filmes cadastrados
+      tags:
+        - Movies
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  metadata:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                      page_size:
+                        type: integer
+                      first_page:
+                        type: integer
+                      last_page:
+                        type: integer
+                      total_records:
+                        type: integer
+                  movies:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Movie'
+              examples:
+                Movies:
+                  value:
+                    metadata:
+                      current_page: 1
+                      page_size: 20
+                      first_page: 1
+                      last_page: 2
+                      total_records: 0
+                    movies:
+                      - id: 1
+                        title: Minions
+                        year: 2015
+                        runtime: 91 mins
+                        genres:
+                          - Infantil
+                          - Ação
+                          - Comédia
+                          - Aventura
+                          - Animação
+                        version: 1
+                      - id: 2
+                        title: Black Panther
+                        year: 2018
+                        runtime: 134 mins
+                        genres:
+                          - sci-fi
+                          - action
+                          - adventure
+                        version: 2
+                Empty:
+                  value:
+                    metadata: {}
+                    movies: []
+        '401':
+          $ref: '#/components/responses/401-Invalid-Token'
+        '422':
+          description: Unprocessable Entity (WebDAV)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+              examples:
+                Errors - /v1/movies?page=abc&page_size=abc:
+                  value:
+                    error:
+                      page: must be an integer value
+                      page_size: must be an integer value
+                Errors - v1/movies?page=-1&page_size=-1&sort=foo:
+                  value:
+                    error:
+                      page: must be greater than zero
+                      page_size: must be greater than zero
+                      sort: invalid sort value
+        '500':
+          $ref: '#/components/responses/500-Server-Error'
+      operationId: get-v1-movies
+      description: '**Show the details of all movies**'
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: title
+          description: Filter movies by title
+        - schema:
+            type: string
+          in: query
+          name: genres
+          description: Filter movies by genres
+        - schema:
+            type: integer
+          in: query
+          name: page
+          description: Page number used in pagination
+        - schema:
+            type: integer
+          in: query
+          name: page_size
+          description: Number of movies shown per page
+        - schema:
+            type: string
+          in: query
+          name: sort
+          description: Column used for sorting
+      security:
+        - bearerAuth: []
+    post:
+      summary: Cadastra um novo filme
+      operationId: post-v1-movies
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  movie:
+                    $ref: '#/components/schemas/Movie'
+              examples:
+                Black Panther:
+                  value:
+                    movie:
+                      id: 1
+                      title: Black Panther
+                      year: 2018
+                      runtime: 134 mins
+                      genres:
+                        - action
+                        - adventure
+                      version: 1
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+              examples:
+                Send some XML as the request body:
+                  value:
+                    error: body contains badly-formed JSON (at character 1)
+                Send some malformed JSON (notice the trailing comma):
+                  value:
+                    error: body contains badly-formed JSON (at character 20)
+                Send a JSON array instead of an object:
+                  value:
+                    error: body contains incorrect JSON type (at character 1)
+                Send a numeric 'title' value (instead of string):
+                  value:
+                    error: body contains incorrect JSON type for "title"
+                Send an empty request body:
+                  value:
+                    error: body must not be empty
+                Single JSON:
+                  value:
+                    error: body must only contain a single JSON value
+        '401':
+          $ref: '#/components/responses/401-Invalid-Token'
+        '403':
+          $ref: '#/components/responses/403-Without-Authorization'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+              examples:
+                Invalid data:
+                  value:
+                    error:
+                      genres: must be provided
+                      runtime: must be provided
+                      title: must be provided
+                      year: must be provided
+      description: '**Create a new movie**'
+      tags:
+        - Movies
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                year:
+                  type: integer
+                runtime:
+                  type: string
+                genres:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - title
+                - year
+                - runtime
+                - genres
+            examples:
+              Black Panther:
+                value:
+                  title: Black Panther
+                  year: 2018
+                  runtime: 134 mins
+                  genres:
+                    - action
+                    - adventure
+      security:
+        - bearerAuth: []
+    parameters: []
+  '/v1/movies/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Recupera um determinado filme
+      tags:
+        - Movies
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  movie:
+                    $ref: '#/components/schemas/Movie'
+              examples:
+                Deadpool:
+                  value:
+                    movie:
+                      id: 2
+                      title: Deadpool
+                      year: 2016
+                      runtime: 108 mins
+                      genres:
+                        - action
+                        - comedy
+                      version: 1
+        '404':
+          $ref: '#/components/responses/404-Resource-NotFound'
+      operationId: get-v1-movies-id
+      description: '**Show the details of a specific movie**'
+      security:
+        - bearerAuth: []
+    patch:
+      summary: Atualiza um determinado filme
+      operationId: patch-v1-movies-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  movie:
+                    $ref: '#/components/schemas/Movie'
+              examples:
+                Black Panther:
+                  value:
+                    movie:
+                      id: 2
+                      title: Black Panther
+                      year: 2018
+                      runtime: 134 mins
+                      genres:
+                        - sci-fi
+                        - action
+                        - adventure
+                      version: 2
+        '401':
+          $ref: '#/components/responses/401-Invalid-Token'
+        '403':
+          $ref: '#/components/responses/403-Without-Authorization'
+      description: '**Update the details of a specific movie**'
+      tags:
+        - Movies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                year:
+                  type: integer
+                runtime:
+                  type: string
+                genres:
+                  type: array
+                  items:
+                    type: string
+            examples:
+              Black Panther:
+                value:
+                  title: Black Panther
+                  year: 2018
+                  runtime: 134 mins
+                  genres:
+                    - sci-fi
+                    - action
+                    - adventure
+      security:
+        - bearerAuth: []
+    delete:
+      summary: Remove um determinado filme
+      operationId: delete-v1-movies-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: movie successfully deleted
+                required:
+                  - message
+              examples:
+                Response:
+                  value:
+                    message: movie successfully deleted
+        '401':
+          $ref: '#/components/responses/401-Invalid-Token'
+        '403':
+          $ref: '#/components/responses/403-Without-Authorization'
+        '404':
+          $ref: '#/components/responses/404-Resource-NotFound'
+      description: '**Delete a specific movie**'
+      tags:
+        - Movies
+      security:
+        - bearerAuth: []
+  /v1/users:
+    post:
+      summary: Registra um novo usuário
+      operationId: post-v1-users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      created_at:
+                        type: string
+                        format: date-time
+                      name:
+                        type: string
+                      email:
+                        type: string
+                      activated:
+                        type: boolean
+                        default: false
+              examples:
+                Bob:
+                  value:
+                    user:
+                      id: 1
+                      created_at: '2022-07-04T02:28:21Z'
+                      name: Bob
+                      email: bob@example.com
+                      activated: false
+        '422':
+          description: Unprocessable Entity (WebDAV)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+              examples:
+                Fields validation error:
+                  value:
+                    error:
+                      email: must be a valid email address
+                      name: must be provided
+                      password: must be at least 8 bytes long
+                There is already a user with that email:
+                  value:
+                    error:
+                      email: a user with this email address already exists
+      tags:
+        - Users
+      description: '**Register a new user**'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+            examples:
+              Bob:
+                value:
+                  name: Bob
+                  email: bob@example.com
+                  password: pa55word
+  /v1/users/activated:
+    put:
+      summary: Ativada o cadastra do determinado usuário
+      operationId: put-v1-users-activated
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      created_at:
+                        type: string
+                      name:
+                        type: string
+                      email:
+                        type: string
+                      activated:
+                        type: boolean
+              examples:
+                Response:
+                  value:
+                    user:
+                      id: 3
+                      created_at: '2022-07-04T02:28:21Z'
+                      name: Bob
+                      email: bob@example.com
+                      activated: true
+        '422':
+          description: Unprocessable Entity (WebDAV)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+              examples:
+                Invalid:
+                  value:
+                    error:
+                      token: must be 26 bytes long
+                Expired:
+                  value:
+                    error:
+                      token: invalid or expired activation token
+      description: '**Activate a specific user**'
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+            examples:
+              Token:
+                value:
+                  token: F4K57S7XX2GA6C5AXTKQMVMHWU
+  /v1/tokens/authentication:
+    post:
+      summary: Gera um novo token de autenticação do usuário
+      operationId: post-v1-tokens-authentication
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authentication_token:
+                    type: object
+                    required:
+                      - token
+                      - expiry
+                    properties:
+                      token:
+                        type: string
+                      expiry:
+                        type: string
+                        format: date-time
+                required:
+                  - authentication_token
+              examples:
+                Token:
+                  value:
+                    authentication_token:
+                      token: 3ST33K5CN7UNA6RO4Q7KZKHQAQ
+                      expiry: '2022-07-05T03:02:32.0242145Z'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    default: invalid authentication credentials
+                required:
+                  - error
+              examples:
+                Error:
+                  value:
+                    error: invalid authentication credentials
+      tags:
+        - Tokens
+      description: '**Generate a new authentication token**'
+  /debug/vars:
+    get:
+      summary: Mostra as métricas da aplicação
+      tags:
+        - Debug
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cmdline:
+                    type: array
+                    items:
+                      type: string
+                  database:
+                    type: object
+                    properties:
+                      MaxOpenConnections:
+                        type: integer
+                      OpenConnections:
+                        type: integer
+                      InUse:
+                        type: integer
+                      Idle:
+                        type: integer
+                      WaitCount:
+                        type: integer
+                        description: Is the total number of times that our application had to wait for a database connection to become available in our sql.DB pool (because all connections were in-use).
+                      WaitDuration:
+                        type: integer
+                        description: Is the cumulative amount of time (in nanoseconds) spent waiting for a connection.
+                      MaxIdleClosed:
+                        type: integer
+                      MaxIdleTimeClosed:
+                        type: integer
+                        description: Is the total count of the number of connections that have been closed because they reached their ConnMaxIdleTime limit.
+                      MaxLifetimeClosed:
+                        type: integer
+                  goroutines:
+                    type: integer
+                  memstats:
+                    type: object
+                    properties:
+                      Alloc:
+                        type: integer
+                      TotalAlloc:
+                        type: integer
+                        description: Cumulative bytes allocated on the heap (will not decrease).
+                      Sys:
+                        type: integer
+                        description: 'Total bytes of memory obtained from the OS (i.e. total memory reserved by the Go runtime for the heap, stacks, and other internal data structures).'
+                      Lookups:
+                        type: integer
+                      Mallocs:
+                        type: integer
+                      Frees:
+                        type: integer
+                      HeapAlloc:
+                        type: integer
+                        description: Current number of bytes on the heap.
+                      HeapSys:
+                        type: integer
+                      HeapIdle:
+                        type: integer
+                      HeapInuse:
+                        type: integer
+                      HeapReleased:
+                        type: integer
+                      HeapObjects:
+                        type: integer
+                        description: Current number of objects on the heap.
+                      StackInuse:
+                        type: integer
+                      StackSys:
+                        type: integer
+                      MSpanInuse:
+                        type: integer
+                      MSpanSys:
+                        type: integer
+                      MCacheInuse:
+                        type: integer
+                      MCacheSys:
+                        type: integer
+                      BuckHashSys:
+                        type: integer
+                      GCSys:
+                        type: integer
+                      OtherSys:
+                        type: integer
+                      NextGC:
+                        type: integer
+                        description: The target heap size of the next garbage collector cycle (Go aims to keep HeapAlloc ≤ NextGC).
+                      LastGC:
+                        type: integer
+                      PauseTotalNs:
+                        type: integer
+                      NumGC:
+                        type: integer
+                        description: Number of completed garbage collector cycles.
+                      NumForcedGC:
+                        type: integer
+                      GCCPUFraction:
+                        type: number
+                      EnableGC:
+                        type: boolean
+                      DebugGC:
+                        type: boolean
+                  timestamp:
+                    type: integer
+                  total_processing_time_μs:
+                    type: integer
+                  total_requests_received:
+                    type: integer
+                  total_responses_sent:
+                    type: integer
+                  total_responses_sent_by_status:
+                    type: object
+                  version:
+                    type: string
+      operationId: get-debug-vars
+      description: '**Display application metrics**'
+components:
+  schemas:
+    Movie:
+      title: Movie
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        year:
+          type: integer
+        runtime:
+          type: string
+        genres:
+          type: array
+          items:
+            type: string
+        version:
+          type: integer
+      required:
+        - id
+        - title
+        - year
+        - runtime
+      description: '**Representa o modelo do filme.**'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Token obtido no login, utilizado nas rotas que precisam estar autenticado.'
+  responses:
+    401-User-Unauthenticated:
+      description: '**Responds when the user is not authenticated to the system.**'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                default: you must be authenticated to access this resource
+            required:
+              - error
+          examples:
+            Response:
+              value:
+                error: you must be authenticated to access this resource
+            Token:
+              value:
+                error: invalid or missing authentication token
+    500-Server-Error:
+      description: '**The server encountered a problem and could not process your request.**'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                default: the server encountered a problem and could not process your request
+            required:
+              - error
+          examples:
+            Response:
+              value:
+                error: the server encountered a problem and could not process your request
+    404-Resource-NotFound:
+      description: '**The requested resource could not be found.**'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                default: the requested resource could not be found
+            required:
+              - error
+          examples:
+            Response:
+              value:
+                error: the requested resource could not be found
+    401-Invalid-Token:
+      description: '**Invalid or missing authentication token.**'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                default: invalid or missing authentication token
+            required:
+              - error
+          examples:
+            Response:
+              value:
+                error: invalid or missing authentication token
+    403-User-Not-Activated:
+      description: '**Your user account must be activated to access this resource.**'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                default: your user account must be activated to access this resource
+            required:
+              - error
+          examples:
+            Error:
+              value:
+                error: your user account must be activated to access this resource
+    403-Without-Authorization:
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                default: your user account doesn't have the necessary permissions to access this resource
+            required:
+              - error
+          examples:
+            Response:
+              value:
+                error: your user account doesn't have the necessary permissions to access this resource
