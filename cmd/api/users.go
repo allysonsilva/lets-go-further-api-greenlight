@@ -106,7 +106,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 
 	// Write a JSON response containing the user data along with a 201 Created status
 	// code.
-	err = app.writeJSON(w, http.StatusAccepted, envelope{"user": user}, nil)
+	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
