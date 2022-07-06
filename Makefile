@@ -157,14 +157,38 @@ docker/build:
 		--env-file ./docker/.env \
 		build app
 
+.PHONY: docker/api/up
+docker/api/up:
+	@echo
+	@echo $(call message_info, Running docker api application... 🚀)
+	@echo
+	@docker-compose --log-level=ERROR -f ./docker/golang/docker-compose.yml --ansi=auto --env-file ./docker/.env up --force-recreate --no-build --no-deps
+
+.PHONY: docker/database/up
+docker/database/up:
+	@echo
+	@echo $(call message_info, Running docker database... 🚀)
+	@echo
+	@docker-compose --log-level=ERROR -f ./docker/mysql/docker-compose.yml --ansi=auto --env-file ./docker/.env up --force-recreate --no-build --no-deps --detach
+
 .PHONY: docker/up
 docker/up:
 	@echo
 	@echo $(call message_info, Running docker application... 🚀)
 	@echo
-	@docker-compose -f ./docker/docker-compose.yml up
-	@echo
-	@docker-compose -f ./docker/mysql/docker-compose.yml --ansi=auto --env-file ./docker/.env up --force-recreate --no-build --no-deps --detach
-	@echo
-	@sleep 60
-	@docker-compose -f ./docker/golang/docker-compose.yml --ansi=auto --env-file ./docker/.env up --force-recreate --no-build --no-deps
+	@docker-compose --log-level=ERROR -f ./docker/docker-compose.yml up
+	@$(MAKE) --no-print-directory docker/database/up
+# HEALTHCHECK DO BANCO DE DADOS
+	@timeout=60; counter=0; container=$(if $(database_container),$(database_container),greenlight_database) ; \
+	printf "\n\033[3;33mEsperando healthcheck do container de banco de dados \"$$container\" = \"healthy\" ⏳ \033[0m\n" ; \
+	until [[ "$$(docker container inspect -f '{{.State.Health.Status}}' $$container)" == "healthy" ]] ; do \
+		printf '.' ; \
+		if [[ $$timeout -lt $$counter ]]; then \
+			printf "\n\033[1;31mERROR: Timed out waiting for \"$$container\" to come up/healthy ❌\033[0m\n\n" ; \
+			exit 1 ; \
+		fi ; \
+		\
+		printf "\n\033[35mWaiting for \"$$container\" to be ready/healthy ($${counter}/$${timeout}) ⏱ \033[0m\n" ; \
+		sleep 5s; counter=$$((counter + 5)) ; \
+	done
+	@$(MAKE) --no-print-directory docker/api/up
